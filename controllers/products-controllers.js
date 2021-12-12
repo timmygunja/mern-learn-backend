@@ -17,7 +17,11 @@ const getProductsList = async (req, res, next) => {
     return res.json({ message: "There are no products in database" });
   }
 
-  res.status(200).json({ products });
+  res
+    .status(200)
+    .json({
+      products: products.map((product) => product.toObject({ getters: true })),
+    });
 };
 
 const getProductById = async (req, res, next) => {
@@ -45,13 +49,14 @@ const createProduct = async (req, res, next) => {
     return next(new HttpError("Invalid info given", 401));
   }
 
-  const { name, description, price } = req.body;
+  const { name, firm, description, price } = req.body;
 
   const createdProduct = new Product({
     name,
+    firm,
     description,
     price,
-    image: "asd",
+    image: "../product.png",
   });
 
   try {
@@ -66,7 +71,7 @@ const createProduct = async (req, res, next) => {
 const updateProduct = async (req, res, next) => {
   let product;
   const productId = req.params.pid;
-  const { name, description, price, image } = req.body;
+  const { name, firm, description, price, image } = req.body;
 
   try {
     product = await Product.findById(productId);
@@ -75,6 +80,7 @@ const updateProduct = async (req, res, next) => {
   }
 
   product.name = name;
+  product.firm = firm;
   product.description = description;
   product.price = price;
   product.image = image;
