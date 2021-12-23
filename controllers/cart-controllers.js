@@ -1,58 +1,65 @@
+const mongoose = require("mongoose");
 const HttpError = require("../models/http-error");
 
+const User = require("../models/user");
 const Product = require("../models/product");
 
-let products;
+let user;
+let product;
+let cartItems;
 
 const getCartList = async (req, res, next) => {
-  // try {
-  //   products = await Product.find();
-  // } catch (error) {
-  //   return next(new HttpError("Could not find any product", 500));
-  // }
+  try {
+    userWithCartItems = await User.findOne({ username: "userone" }).populate(
+      "cartItems"
+    );
+  } catch (error) {
+    return next(new HttpError("Could not find any cart items", 500));
+  }
 
-  // if (products.length === 0) {
-  //   return res.json({ message: "There are no products in database" });
-  // }
-
-  res.status(200).json({ message: "Henlo" });
+  res.status(200).json({
+    cartItems: userWithCartItems.cartItems.map((item) =>
+      item.toObject({ getters: true })
+    ),
+  });
 };
 
 const addToCart = async (req, res, next) => {
-  // const { name, description, price } = req.body;
+  const productId = req.params.pid;
 
-  // const createdProduct = new Product({
-  //   name,
-  //   description,
-  //   price,
-  //   image: "asd",
-  // });
+  try {
+    user = await User.findOne({ username: "userone" });
+    product = await Product.findById(productId);
 
-  // try {
-  //   await createdProduct.save();
-  // } catch (err) {
-  //   return next(new HttpError("Could not save the product object", 500));
-  // }
+    const sess = await mongoose.startSession();
+    sess.startTransaction();
+    await product.save({ session: sess });
+    user.cartItems.push(product);
+    await user.save({ session: sess });
+    await sess.commitTransaction();
+  } catch (error) {
+    console.log(error);
+    return next(new HttpError("Could not add product to cart", 500));
+  }
 
-  // res.status(201).json({ createdProduct });
+  res.status(200).json({
+    message: "Added to cart",
+  });
 };
 
 const deleteFromCart = async (req, res, next) => {
   // let product;
   // const productId = req.params.pid;
-
   // try {
   //   product = await Product.findById(productId);
   // } catch (err) {
   //   return next(new HttpError("Could not find the product object", 500));
   // }
-
   // try {
   //   await product.delete();
   // } catch (err) {
   //   return next(new HttpError("Could not delete the product object", 500));
   // }
-
   // res.status(200).json({ message: "Deleted product successfully" });
 };
 
