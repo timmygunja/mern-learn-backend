@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+const mongoose = require("mongoose")
 const HttpError = require("../models/http-error");
 
 const User = require("../models/user");
@@ -10,17 +10,13 @@ let cartItems;
 
 const getCartList = async (req, res, next) => {
   try {
-    userWithCartItems = await User.findOne({ username: "userone" }).populate(
-      "cartItems"
-    );
+    userWithCartItems = await User.findOne({ username: "userone" }).populate("cartItems");
   } catch (error) {
     return next(new HttpError("Could not find any cart items", 500));
   }
 
   res.status(200).json({
-    cartItems: userWithCartItems.cartItems.map((item) =>
-      item.toObject({ getters: true })
-    ),
+    cartItems: userWithCartItems.cartItems.map((item) => item.toObject({ getters: true })),
   });
 };
 
@@ -37,6 +33,7 @@ const addToCart = async (req, res, next) => {
     user.cartItems.push(product);
     await user.save({ session: sess });
     await sess.commitTransaction();
+
   } catch (error) {
     console.log(error);
     return next(new HttpError("Could not add product to cart", 500));
