@@ -1,11 +1,14 @@
 const HttpError = require("../models/http-error");
 const User = require("../models/user");
 
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+
 let users;
 
 const getUsersList = async (req, res, next) => {
   try {
-    users = await User.find({}, '-password');
+    users = await User.find({}, "-password");
   } catch (error) {
     return next(new HttpError("Could not find any users", 500));
   }
@@ -14,7 +17,9 @@ const getUsersList = async (req, res, next) => {
     return res.json({ message: "There are no users in database" });
   }
 
-  res.status(200).json({ users: users.map(user => user.toObject({ getters: true }) ) });
+  res
+    .status(200)
+    .json({ users: users.map((user) => user.toObject({ getters: true })) });
 };
 
 const getUserById = async (req, res, next) => {
@@ -48,11 +53,20 @@ const createUser = async (req, res, next) => {
     return next(new HttpError("Sign up failed, username reserved", 422));
   }
 
+  let hashedPassword;
+  try {
+    hashedPassword = await bcrypt.hash(password, 12);
+  } catch (error) {
+    return next(new HttpError("Password hashing failed", 500));
+  }
+
   const createdUser = new User({
     username,
-    password,
-    favItems: [],
-    cartItems: []
+    password: hashedPassword,
+    cart: [],
+    cartQuantity: 0,
+    cartTotalPrice: 0,
+    favorites: [],
   });
 
   try {
@@ -61,7 +75,22 @@ const createUser = async (req, res, next) => {
     return next(new HttpError("Could not save the user object", 500));
   }
 
-  res.status(201).json({ createdUser: createdUser.toObject({ getters: true }) });
+  let token;
+  try {
+    token = jwt.sign(
+      { userId: createdUser.id, username: createdUser.username },
+      "supersecret_key",
+      { expiresIn: "6h" }
+    );
+  } catch (error) {
+    return next(new HttpError("Sign up failed, try again", 500));
+  }
+
+  res.status(201).json({
+    userId: createdUser.id,
+    username: createdUser.username,
+    token: token,
+  });
 };
 
 const login = async (req, res, next) => {
@@ -75,13 +104,38 @@ const login = async (req, res, next) => {
   }
 
   if (!existingUser) {
-    return next(new HttpError("Logging in failed, no such username registered", 422));
-  }
-  if (existingUser.password !== password) {
-    return next(new HttpError("Logging in failed, wrong password given", 422));
+    return next(
+      new HttpError("Logging in failed, no such username registered", 422)
+    );
   }
 
-  res.status(200).json({ message: "Logged in" });
+  let isValidPassword;
+  try {
+    isValidPassword = await bcrypt.compare(password, existingUser.password);
+  } catch (error) {
+    return next(new HttpError("Logging in failed, wrong password given", 500));
+  }
+
+  if (!isValidPassword) {
+    return next(new HttpError("Logging in failed, wrong password given", 401));
+  }
+
+  let token;
+  try {
+    token = jwt.sign(
+      { userId: existingUser.id, username: existingUser.username },
+      "supersecret_key",
+      { expiresIn: "6h" }
+    );
+  } catch (error) {
+    return next(new HttpError("Logging in failed, try again", 500));
+  }
+
+  res.status(201).json({
+    userId: existingUser.id,
+    username: existingUser.username,
+    token: token,
+  });
 };
 
 const updateUser = async (req, res, next) => {
@@ -125,7 +179,6 @@ const deleteUser = async (req, res, next) => {
 
   res.status(200).json({ message: "Deleted user successfully" });
 };
-
 
 module.exports.getUsersList = getUsersList;
 module.exports.getUserById = getUserById;

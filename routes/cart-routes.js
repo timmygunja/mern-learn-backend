@@ -2,9 +2,11 @@ const express = require("express");
 
 const router = express.Router();
 
-const { check } = require("express-validator")
+const checkAuth = require("../middleware/check-auth");
 
 const cartControllers = require("../controllers/cart-controllers");
+
+router.use(checkAuth);
 
 router.get("/", cartControllers.getCartList);
 
