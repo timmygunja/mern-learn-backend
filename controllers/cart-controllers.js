@@ -9,24 +9,25 @@ let product;
 let cartItems;
 
 const getCartList = async (req, res, next) => {
+  const username = req.headers.username;
+
   try {
-    userWithCart = await User.findOne({ username: "user" }).populate("cart");
+    user = await User.findOne({ username: username }).populate("cart");
   } catch (error) {
     return next(new HttpError("Could not find any cart items", 500));
   }
 
   res.status(200).json({
-    cartItems: userWithCart.cart.map((item) =>
-      item.toObject({ getters: true })
-    ),
+    cartItems: user.cart.map((item) => item.toObject({ getters: true })),
   });
 };
 
 const addToCart = async (req, res, next) => {
   const productId = req.params.pid;
+  const username = req.headers.username;
 
   try {
-    user = await User.findOne({ username: "user" }).populate("cart");
+    user = await User.findOne({ username: username }).populate("cart");
     product = await Product.findById(productId);
 
     const sess = await mongoose.startSession();
@@ -47,19 +48,21 @@ const addToCart = async (req, res, next) => {
 };
 
 const deleteFromCart = async (req, res, next) => {
-  // let product;
-  // const productId = req.params.pid;
-  // try {
-  //   product = await Product.findById(productId);
-  // } catch (err) {
-  //   return next(new HttpError("Could not find the product object", 500));
-  // }
-  // try {
-  //   await product.delete();
-  // } catch (err) {
-  //   return next(new HttpError("Could not delete the product object", 500));
-  // }
-  // res.status(200).json({ message: "Deleted product successfully" });
+  const productId = req.params.pid;
+  const username = req.headers.username;
+
+  try {
+    user = await User.findOne({ username: username }).populate("cart");
+    user.cart.pull(productId);
+    await user.save();
+  } catch (error) {
+    console.log(error);
+    return next(new HttpError("Could not delete product from cart", 500));
+  }
+
+  res.status(200).json({
+    message: "Deleted product successfully",
+  });
 };
 
 module.exports.getCartList = getCartList;
