@@ -3,6 +3,7 @@ const HttpError = require("../models/http-error");
 const { validationResult } = require("express-validator");
 
 const Product = require("../models/product");
+const User = require("../models/user");
 
 let products;
 
@@ -17,11 +18,9 @@ const getProductsList = async (req, res, next) => {
     return res.json({ message: "There are no products in database" });
   }
 
-  res
-    .status(200)
-    .json({
-      products: products.map((product) => product.toObject({ getters: true })),
-    });
+  res.status(200).json({
+    products: products.map((product) => product.toObject({ getters: true })),
+  });
 };
 
 const getProductById = async (req, res, next) => {
@@ -42,6 +41,12 @@ const getProductById = async (req, res, next) => {
 };
 
 const createProduct = async (req, res, next) => {
+  const username = req.headers.username;
+  const admin = User.findOne({ username: "admin" });
+  if (username !== admin.username) {
+    return next(new HttpError("You have no rights to this page", 401));
+  }
+
   const errors = validationResult(req);
 
   if (!errors.isEmpty()) {
