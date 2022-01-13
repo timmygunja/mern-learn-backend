@@ -1,4 +1,5 @@
 const HttpError = require("../models/http-error");
+const fs = require("fs");
 
 const { validationResult } = require("express-validator");
 
@@ -61,7 +62,7 @@ const createProduct = async (req, res, next) => {
     firm,
     description,
     price,
-    image: "../product.png",
+    image: req.file.path,
   });
 
   try {
@@ -114,6 +115,11 @@ const deleteProduct = async (req, res, next) => {
   } catch (err) {
     return next(new HttpError("Could not delete the product object", 500));
   }
+
+  const imagePath = product.image;
+  fs.unlink(imagePath, (err) => {
+    console.log(err);
+  });
 
   res.status(200).json({ message: "Deleted product successfully" });
 };

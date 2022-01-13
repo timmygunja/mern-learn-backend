@@ -1,6 +1,8 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
+const fs = require("fs");
+const path = require("path");
 
 const HttpError = require("./models/http-error");
 
@@ -12,6 +14,9 @@ const cartRoutes = require("./routes/cart-routes");
 const app = express();
 
 app.use(bodyParser.json());
+
+app.use("/uploads/images", express.static(path.join("uploads", "images")));
+
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader(
@@ -31,12 +36,18 @@ app.use((req, res, next) => {
   return next(new HttpError("Could not find this path", 404));
 });
 
+// FAILED REQUESTS LAND HERE
 app.use((error, req, res, next) => {
+  if (req.file) {
+    fs.unlink(req.file.path, (err) => {
+      console.log(err);
+    });
+  }
   if (res.headerSent) {
     return next(error);
   }
   res.status(error.code || 500);
-  res.json({ message: error.message || 'An unknown error occurred!' });
+  res.json({ message: error.message || "An unknown error occurred!" });
 });
 
 mongoose
