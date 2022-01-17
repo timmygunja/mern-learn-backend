@@ -29,7 +29,7 @@ app.use((req, res, next) => {
 
 app.use("/api/products", productsRoutes);
 app.use("/api/users", usersRoutes);
-app.use("/api/favourites", favsRoutes);
+app.use("/api/favorites", favsRoutes);
 app.use("/api/cart", cartRoutes);
 
 app.use((req, res, next) => {

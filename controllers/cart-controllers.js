@@ -14,7 +14,7 @@ const getCartList = async (req, res, next) => {
   try {
     user = await User.findOne({ username: username }).populate("cart");
   } catch (error) {
-    return next(new HttpError("Could not find any cart items", 500));
+    return next(new HttpError("Could not find user cart object", 500));
   }
 
   res.status(200).json({
@@ -61,7 +61,7 @@ const deleteFromCart = async (req, res, next) => {
   }
 
   res.status(200).json({
-    message: "Deleted product successfully",
+    message: "Deleted product from cart successfully",
   });
 };
 

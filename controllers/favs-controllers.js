@@ -1,59 +1,66 @@
+const mongoose = require("mongoose");
 const HttpError = require("../models/http-error");
 
+const User = require("../models/user");
 const Product = require("../models/product");
 
-let products;
+let user;
+let product;
 
 const getFavsList = async (req, res, next) => {
-  // try {
-  //   products = await Product.find();
-  // } catch (error) {
-  //   return next(new HttpError("Could not find any product", 500));
-  // }
+  const username = req.headers.username;
 
-  // if (products.length === 0) {
-  //   return res.json({ message: "There are no products in database" });
-  // }
+  try {
+    user = await User.findOne({ username: username }).populate("favorites");
+  } catch (error) {
+    return next(new HttpError("Could not find user favorites object", 500));
+  }
 
-  // res.status(200).json({ products });
+  res.status(200).json({
+    favItems: user.favorites.map((item) => item.toObject({ getters: true })),
+  });
 };
 
 const addToFavs = async (req, res, next) => {
-  // const { name, description, price } = req.body;
+  const productId = req.params.pid;
+  const username = req.headers.username;
 
-  // const createdProduct = new Product({
-  //   name,
-  //   description,
-  //   price,
-  //   image: "asd",
-  // });
+  try {
+    user = await User.findOne({ username: username }).populate("favorites");
+    product = await Product.findById(productId);
 
-  // try {
-  //   await createdProduct.save();
-  // } catch (err) {
-  //   return next(new HttpError("Could not save the product object", 500));
-  // }
+    const sess = await mongoose.startSession();
+    sess.startTransaction();
+    await product.save({ session: sess });
+    user.favorites.push(product);
+    await user.save({ session: sess });
+    await sess.commitTransaction();
+  } catch (error) {
+    console.log(error);
+    return next(new HttpError("Could not add product to favorites", 500));
+  }
 
-  // res.status(201).json({ createdProduct });
+  res.status(200).json({
+    message: "Added to favorites",
+  });
 };
 
 const deleteFromFavs = async (req, res, next) => {
-  // let product;
-  // const productId = req.params.pid;
+  const productId = req.params.pid;
+  const username = req.headers.username;
 
-  // try {
-  //   product = await Product.findById(productId);
-  // } catch (err) {
-  //   return next(new HttpError("Could not find the product object", 500));
-  // }
+  try {
+    user = await User.findOne({ username: username }).populate("favorites");
+    user.favorites.pull(productId);
+    await user.save();
+  } catch (error) {
+    console.log(error);
+    return next(new HttpError("Could not delete product from favorites", 500));
+  }
 
-  // try {
-  //   await product.delete();
-  // } catch (err) {
-  //   return next(new HttpError("Could not delete the product object", 500));
-  // }
-
-  // res.status(200).json({ message: "Deleted product successfully" });
+  res.status(200).json({
+    message: "Deleted product from favorites successfully",
+  });
 };
 
 module.exports.getFavsList = getFavsList;
