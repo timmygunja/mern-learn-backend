@@ -10,6 +10,8 @@ router.use(checkAuth);
 
 router.get("/", cartControllers.getCartList);
 
+router.get("/getCartLength", cartControllers.getCartLength);
+
 router.post("/:pid", cartControllers.addToCart);
 
 router.delete("/:pid", cartControllers.deleteFromCart);

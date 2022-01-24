@@ -22,6 +22,20 @@ const getCartList = async (req, res, next) => {
   });
 };
 
+const getCartLength = async (req, res, next) => {
+  const username = req.headers.username;
+
+  try {
+    user = await User.findOne({ username: username }).populate("cart");
+  } catch (error) {
+    return next(new HttpError("Could not find user cart object", 500));
+  }
+
+  res.status(200).json({
+    cartLength: user.cart.length,
+  });
+};
+
 const addToCart = async (req, res, next) => {
   const productId = req.params.pid;
   const username = req.headers.username;
@@ -66,5 +80,6 @@ const deleteFromCart = async (req, res, next) => {
 };
 
 module.exports.getCartList = getCartList;
+module.exports.getCartLength = getCartLength;
 module.exports.addToCart = addToCart;
 module.exports.deleteFromCart = deleteFromCart;
