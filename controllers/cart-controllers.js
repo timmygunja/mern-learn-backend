@@ -4,6 +4,7 @@ const HttpError = require("../models/http-error");
 const User = require("../models/user");
 const Product = require("../models/product");
 const CartItem = require("../models/cartItem");
+const cartItem = require("../models/cartItem");
 
 let user;
 let product;
@@ -57,6 +58,7 @@ const getCartList = async (req, res, next) => {
 
 const getCartLength = async (req, res, next) => {
   const username = req.headers.username;
+  let cartTotalAmount = 0;
 
   try {
     user = await User.findOne({ username: username }).populate("cart");
@@ -64,8 +66,12 @@ const getCartLength = async (req, res, next) => {
     return next(new HttpError("Could not find user cart object", 500));
   }
 
+  user.cart.map((item) => {
+    cartTotalAmount += item.quantity;
+  });
+
   res.status(200).json({
-    cartLength: user.cart.length,
+    cartLength: cartTotalAmount,
   });
 };
 
@@ -101,28 +107,55 @@ const addToCart = async (req, res, next) => {
   try {
     user = await User.findOne({ username: username }).populate("cart");
     product = await Product.findById(productId);
-
-    const createdCartItem = new CartItem({
-      product: product,
-      quantity: 1,
-    });
-
-    // try {
-    //   await createdCartItem.save();
-    // } catch (err) {
-    //   return next(new HttpError("Could not save the cart item object", 500));
-    // }
-
-    const sess = await mongoose.startSession();
-    sess.startTransaction();
-    await createdCartItem.save({ session: sess });
-    user.cart.push(createdCartItem);
-    user.cartTotalPrice += product.price;
-    await user.save({ session: sess });
-    await sess.commitTransaction();
   } catch (error) {
-    console.log(error);
-    return next(new HttpError("Could not add cart item to cart", 500));
+    return next(new HttpError("Could not find user or product", 500));
+  }
+
+  let productAlreadyInCart = false;
+  let cartItem;
+  let currentProductId;
+
+  user.cart.map((item) => {
+    currentProductId = item.product.toString();
+    if (currentProductId === productId) {
+      productAlreadyInCart = true;
+      cartItem = item;
+    }
+  });
+
+  if (productAlreadyInCart) {
+    try {
+      cartItem.quantity += 1;
+      await cartItem.save();
+      user.cartTotalPrice += product.price;
+      await user.save();
+    } catch (error) {
+      return next(new HttpError("Could not increase cart item quantity", 500));
+    }
+  } else {
+    try {
+      const createdCartItem = new CartItem({
+        product: product,
+        quantity: 1,
+      });
+
+      // try {
+      //   await createdCartItem.save();
+      // } catch (err) {
+      //   return next(new HttpError("Could not save the cart item object", 500));
+      // }
+
+      const sess = await mongoose.startSession();
+      sess.startTransaction();
+      await createdCartItem.save({ session: sess });
+      user.cart.push(createdCartItem);
+      user.cartTotalPrice += product.price;
+      await user.save({ session: sess });
+      await sess.commitTransaction();
+    } catch (error) {
+      console.log(error);
+      return next(new HttpError("Could not add cart item to cart", 500));
+    }
   }
 
   res.status(200).json({
@@ -131,17 +164,40 @@ const addToCart = async (req, res, next) => {
 };
 
 const deleteFromCart = async (req, res, next) => {
-  const productId = req.params.pid;
+  const cartItemId = req.params.pid;
   const username = req.headers.username;
 
   try {
-    user = await User.findOne({ username: username }).populate("cart");
-    user.cart.pull(productId);
-    user.cartTotalPrice -= product.price;
-    await user.save();
+    const cartItemWithProduct = await CartItem.findById(cartItemId).populate(
+      "product"
+    );
+    product = cartItemWithProduct.product;
+    const cartItem = await CartItem.findById(cartItemId);
+
+    if (cartItem.quantity > 1) {
+      try {
+        cartItem.quantity -= 1;
+        await cartItem.save();
+        user.cartTotalPrice -= product.price;
+        await user.save();
+      } catch (error) {
+        return next(
+          new HttpError("Could not decrease cart item quantity", 500)
+        );
+      }
+    } else {
+      try {
+        user = await User.findOne({ username: username }).populate("cart");
+        user.cart.pull(cartItemId);
+        user.cartTotalPrice -= product.price;
+        await user.save();
+      } catch (error) {
+        console.log(error);
+        return next(new HttpError("Could not delete product from cart", 500));
+      }
+    }
   } catch (error) {
-    console.log(error);
-    return next(new HttpError("Could not delete product from cart", 500));
+    return next(new HttpError("Could not find cart item object", 500));
   }
 
   res.status(200).json({
