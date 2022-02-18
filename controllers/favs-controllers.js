@@ -21,6 +21,25 @@ const getFavsList = async (req, res, next) => {
   });
 };
 
+const getFavsIdsList = async (req, res, next) => {
+  const username = req.headers.username;
+  let favItemsIds = [];
+
+  try {
+    user = await User.findOne({ username: username }).populate("favorites");
+  } catch (error) {
+    return next(new HttpError("Could not find user favorites object", 500));
+  }
+
+  user.favorites.map((item) => {
+    favItemsIds.push(item.id);
+  });
+
+  res.status(200).json({
+    favItemsIds: favItemsIds,
+  });
+};
+
 const addToFavs = async (req, res, next) => {
   const productId = req.params.pid;
   const username = req.headers.username;
@@ -64,5 +83,6 @@ const deleteFromFavs = async (req, res, next) => {
 };
 
 module.exports.getFavsList = getFavsList;
+module.exports.getFavsIdsList = getFavsIdsList;
 module.exports.addToFavs = addToFavs;
 module.exports.deleteFromFavs = deleteFromFavs;

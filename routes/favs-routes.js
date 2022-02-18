@@ -10,6 +10,8 @@ router.use(checkAuth);
 
 router.get("/", favsControllers.getFavsList);
 
+router.get("/ids", favsControllers.getFavsIdsList);
+
 router.post("/:pid", favsControllers.addToFavs);
 
 router.delete("/:pid", favsControllers.deleteFromFavs);
