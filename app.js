@@ -3,6 +3,7 @@ const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const fs = require("fs");
 const path = require("path");
+require("dotenv").config();
 
 const HttpError = require("./models/http-error");
 
@@ -52,11 +53,13 @@ app.use((error, req, res, next) => {
 
 mongoose
   .connect(
-    "mongodb+srv://admin:admin@cluster0.lwsbc.mongodb.net/myFirstDatabase?retryWrites=true&w=majority",
+    // "mongodb+srv://admin:admin@cluster0.lwsbc.mongodb.net/myFirstDatabase?retryWrites=true&w=majority",
+    process.env.MONGODB_URL,
     { useNewUrlParser: true, useUnifiedTopology: true }
   )
   .then(() => {
-    app.listen(5000);
+    // app.listen(5000);
+    app.listen(process.env.PORT);
   })
   .catch((err) => {
     console.log(err);
