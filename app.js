@@ -51,6 +51,8 @@ app.use((error, req, res, next) => {
   res.json({ message: error.message || "An unknown error occurred!" });
 });
 
+console.log(process.env.MONGODB_URL);
+
 mongoose
   .connect(
     // "mongodb+srv://admin:admin@cluster0.lwsbc.mongodb.net/myFirstDatabase?retryWrites=true&w=majority",
