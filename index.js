@@ -25,6 +25,7 @@ app.use((req, res, next) => {
     "Origin, X-Requested-With, Content-Type, Accept, Authorization, Username"
   );
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, PATCH, DELETE");
+  // res.header("Access-Control-Allow-Credentials", true);
   next();
 });
 
@@ -50,7 +51,6 @@ app.use((error, req, res, next) => {
   res.status(error.code || 500);
   res.json({ message: error.message || "An unknown error occurred!" });
 });
-
 
 mongoose
   .connect(
