@@ -57,6 +57,8 @@ const createProduct = async (req, res, next) => {
 
   const { name, firm, description, price } = req.body;
 
+  console.log(name, firm, description, price);
+
   const createdProduct = new Product({
     name,
     firm,
