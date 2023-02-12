@@ -48,15 +48,22 @@ const createProduct = async (req, res, next) => {
     return next(new HttpError("You have no rights to this page", 401));
   }
 
+  console.log("flag 1");
+
   const errors = validationResult(req);
+
+  console.log("flag 2");
 
   if (!errors.isEmpty()) {
     console.log(errors);
     return next(new HttpError("Invalid info given", 401));
   }
 
+  console.log("flag 3");
+
   const { name, firm, description, price } = req.body;
 
+  console.log("flag 4");
   console.log(name, firm, description, price);
 
   const createdProduct = new Product({
@@ -67,11 +74,17 @@ const createProduct = async (req, res, next) => {
     image: req.file.path,
   });
 
+  console.log("flag 5");
+
   try {
     await createdProduct.save();
+    console.log("flag 6");
   } catch (err) {
+    console.log("flag 6 FAILED");
     return next(new HttpError("Could not save the product object", 500));
   }
+
+  console.log("flag 7");
 
   res.status(201).json({ createdProduct });
 };
