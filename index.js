@@ -3,6 +3,7 @@ const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const fs = require("fs");
 const path = require("path");
+const cors = require("cors");
 require("dotenv").config();
 
 const HttpError = require("./models/http-error");
@@ -16,16 +17,12 @@ const app = express();
 
 app.use(bodyParser.json());
 
-const cors = require("cors");
-
-app.use(cors());
-
-// app.use("/uploads/images", express.static(path.join("uploads", "images")));
-// app.use('/uploads/images', express.static('uploads/images'));
 app.use(
   "/uploads/images",
   express.static(path.join(__dirname, "./uploads/images"))
 );
+
+app.use(cors());
 
 // app.use((req, res, next) => {
 //   res.setHeader("Access-Control-Allow-Origin", "*");
