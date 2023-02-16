@@ -16,20 +16,27 @@ const app = express();
 
 app.use(bodyParser.json());
 
+const cors = require("cors");
+
+app.use(cors());
+
 // app.use("/uploads/images", express.static(path.join("uploads", "images")));
 // app.use('/uploads/images', express.static('uploads/images'));
-app.use("/uploads/images", express.static(path.join(__dirname, "./uploads/images")));
+app.use(
+  "/uploads/images",
+  express.static(path.join(__dirname, "./uploads/images"))
+);
 
-app.use((req, res, next) => {
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader(
-    "Access-Control-Allow-Headers",
-    "Origin, X-Requested-With, Content-Type, Accept, Authorization, Username"
-  );
-  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PATCH, DELETE");
-  // res.header("Access-Control-Allow-Credentials", true);
-  next();
-});
+// app.use((req, res, next) => {
+//   res.setHeader("Access-Control-Allow-Origin", "*");
+//   res.setHeader(
+//     "Access-Control-Allow-Headers",
+//     "Origin, X-Requested-With, Content-Type, Accept, Authorization, Username"
+//   );
+//   res.setHeader("Access-Control-Allow-Methods", "GET, POST, PATCH, DELETE");
+//   // res.header("Access-Control-Allow-Credentials", true);
+//   next();
+// });
 
 app.use("/api/products", productsRoutes);
 app.use("/api/users", usersRoutes);
