@@ -4,6 +4,8 @@ const User = require("../models/user");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
+require("dotenv").config();
+
 let users;
 
 const getUsersList = async (req, res, next) => {
@@ -79,7 +81,8 @@ const createUser = async (req, res, next) => {
   try {
     token = jwt.sign(
       { userId: createdUser.id, username: createdUser.username },
-      "supersecret_key",
+      // "supersecret_key",
+      process.env.SECRET_KEY,
       { expiresIn: "6h" }
     );
   } catch (error) {
@@ -124,9 +127,15 @@ const login = async (req, res, next) => {
   try {
     token = jwt.sign(
       { userId: existingUser.id, username: existingUser.username },
-      "supersecret_key",
+      // "supersecret_key",
+      process.env.SECRET_KEY,
       { expiresIn: "12h" }
     );
+
+    console.log(existingUser.id);
+    console.log(existingUser.username);
+    console.log(token);
+    
   } catch (error) {
     return next(new HttpError("Logging in failed, try again", 500));
   }

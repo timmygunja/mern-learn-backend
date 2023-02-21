@@ -28,7 +28,7 @@ let cartItems;
 // };
 
 const getCartList = async (req, res, next) => {
-  const username = req.headers.username;
+  const username = decodeURIComponent(escape(req.headers.username));
 
   try {
     user = await User.findOne({ username: username }).populate("cart");
@@ -57,7 +57,7 @@ const getCartList = async (req, res, next) => {
 };
 
 const getCartLength = async (req, res, next) => {
-  const username = req.headers.username;
+  const username = decodeURIComponent(escape(req.headers.username));
   let cartTotalAmount = 0;
 
   try {
@@ -77,7 +77,7 @@ const getCartLength = async (req, res, next) => {
 
 // const addToCart = async (req, res, next) => {
 //   const productId = req.params.pid;
-//   const username = req.headers.username;
+//   const username = decodeURIComponent(escape(req.headers.username));
 
 //   try {
 //     user = await User.findOne({ username: username }).populate("cart");
@@ -102,7 +102,7 @@ const getCartLength = async (req, res, next) => {
 
 const addToCart = async (req, res, next) => {
   const productId = req.params.pid;
-  const username = req.headers.username;
+  const username = decodeURIComponent(escape(req.headers.username));
 
   try {
     user = await User.findOne({ username: username }).populate("cart");
@@ -165,7 +165,7 @@ const addToCart = async (req, res, next) => {
 
 const deleteFromCart = async (req, res, next) => {
   const cartItemId = req.params.pid;
-  const username = req.headers.username;
+  const username = decodeURIComponent(escape(req.headers.username));
 
   try {
     const cartItemWithProduct = await CartItem.findById(cartItemId).populate(

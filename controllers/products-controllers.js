@@ -42,7 +42,7 @@ const getProductById = async (req, res, next) => {
 };
 
 const createProduct = async (req, res, next) => {
-  const username = req.headers.username;
+  const username = decodeURIComponent(escape(req.headers.username));
   const admin = User.findOne({ username: "admin" });
   if (username !== admin.username) {
     return next(new HttpError("You have no rights to this page", 401));

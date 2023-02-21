@@ -8,7 +8,7 @@ let user;
 let product;
 
 const getFavsList = async (req, res, next) => {
-  const username = req.headers.username;
+  const username = decodeURIComponent(escape(req.headers.username));
 
   try {
     user = await User.findOne({ username: username }).populate("favorites");
@@ -22,7 +22,7 @@ const getFavsList = async (req, res, next) => {
 };
 
 const getFavsIdsList = async (req, res, next) => {
-  const username = req.headers.username;
+  const username = decodeURIComponent(escape(req.headers.username));
   let favItemsIds = [];
 
   try {
@@ -42,7 +42,7 @@ const getFavsIdsList = async (req, res, next) => {
 
 const addToFavs = async (req, res, next) => {
   const productId = req.params.pid;
-  const username = req.headers.username;
+  const username = decodeURIComponent(escape(req.headers.username));
 
   try {
     user = await User.findOne({ username: username }).populate("favorites");
@@ -66,7 +66,7 @@ const addToFavs = async (req, res, next) => {
 
 const deleteFromFavs = async (req, res, next) => {
   const productId = req.params.pid;
-  const username = req.headers.username;
+  const username = decodeURIComponent(escape(req.headers.username));
 
   try {
     user = await User.findOne({ username: username }).populate("favorites");
