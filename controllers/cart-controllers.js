@@ -57,9 +57,11 @@ const getCartList = async (req, res, next) => {
 };
 
 const getCartLength = async (req, res, next) => {
+  console.log("flag 1");
+  console.log("username before decoding", req.headers.username);
   const username = decodeURIComponent(escape(req.headers.username));
 
-  console.log(username);
+  console.log("username after decoding", username);
 
   let cartTotalAmount = 0;
 
