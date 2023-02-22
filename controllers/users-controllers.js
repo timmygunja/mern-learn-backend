@@ -131,11 +131,6 @@ const login = async (req, res, next) => {
       process.env.SECRET_KEY,
       { expiresIn: "12h" }
     );
-
-    console.log(existingUser.id);
-    console.log(existingUser.username);
-    console.log(token);
-    
   } catch (error) {
     return next(new HttpError("Logging in failed, try again", 500));
   }
