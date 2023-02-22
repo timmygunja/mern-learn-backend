@@ -91,7 +91,7 @@ const createUser = async (req, res, next) => {
 
   res.status(201).json({
     userId: createdUser.id,
-    username: createdUser.username,
+    username: unescape(encodeURIComponent(createdUser.username)),
     token: token,
   });
 };
@@ -137,7 +137,7 @@ const login = async (req, res, next) => {
 
   res.status(201).json({
     userId: existingUser.id,
-    username: existingUser.username,
+    username: unescape(encodeURIComponent(existingUser.username)),
     token: token,
   });
 };
