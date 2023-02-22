@@ -23,6 +23,9 @@ const getFavsList = async (req, res, next) => {
 
 const getFavsIdsList = async (req, res, next) => {
   const username = decodeURIComponent(escape(req.headers.username));
+
+  console.log(username);
+
   let favItemsIds = [];
 
   try {

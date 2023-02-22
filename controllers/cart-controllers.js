@@ -58,6 +58,9 @@ const getCartList = async (req, res, next) => {
 
 const getCartLength = async (req, res, next) => {
   const username = decodeURIComponent(escape(req.headers.username));
+
+  console.log(username);
+
   let cartTotalAmount = 0;
 
   try {
