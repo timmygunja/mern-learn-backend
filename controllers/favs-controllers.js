@@ -24,8 +24,6 @@ const getFavsList = async (req, res, next) => {
 const getFavsIdsList = async (req, res, next) => {
   const username = decodeURIComponent(escape(req.headers.username));
 
-  console.log(username);
-
   let favItemsIds = [];
 
   try {
@@ -62,6 +60,13 @@ const addToFavs = async (req, res, next) => {
     return next(new HttpError("Could not add product to favorites", 500));
   }
 
+  try {
+    product.likedCount += 1;
+    await product.save();
+  } catch (error) {
+    return next(new HttpError("Could not add to likedCount of the product", 500));
+  }
+
   res.status(200).json({
     message: "Added to favorites",
   });
@@ -78,6 +83,13 @@ const deleteFromFavs = async (req, res, next) => {
   } catch (error) {
     console.log(error);
     return next(new HttpError("Could not delete product from favorites", 500));
+  }
+
+  try {
+    product.likedCount -= 1;
+    await product.save();
+  } catch (error) {
+    return next(new HttpError("Could not subtract from likedCount of the product", 500));
   }
 
   res.status(200).json({

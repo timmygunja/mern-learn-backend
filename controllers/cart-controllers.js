@@ -57,11 +57,7 @@ const getCartList = async (req, res, next) => {
 };
 
 const getCartLength = async (req, res, next) => {
-  console.log("flag 1");
-  console.log("username before decoding", req.headers.username);
   const username = decodeURIComponent(escape(req.headers.username));
-
-  console.log("username after decoding", username);
 
   let cartTotalAmount = 0;
 
@@ -163,6 +159,13 @@ const addToCart = async (req, res, next) => {
     }
   }
 
+  try {
+    product.purchasedCount += 1;
+    await product.save();
+  } catch (error) {
+    return next(new HttpError("Could not add to purchasedCount of the product", 500));
+  }
+
   res.status(200).json({
     message: "Added to cart",
   });
@@ -203,6 +206,13 @@ const deleteFromCart = async (req, res, next) => {
     }
   } catch (error) {
     return next(new HttpError("Could not find cart item object", 500));
+  }
+
+  try {
+    product.purchasedCount -= 1;
+    await product.save();
+  } catch (error) {
+    return next(new HttpError("Could not subtract from purchasedCount of the product", 500));
   }
 
   res.status(200).json({

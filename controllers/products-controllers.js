@@ -10,14 +10,28 @@ let products;
 
 const getProductsList = async (req, res, next) => {
   try {
-    products = await Product.find();
+    products = await Product.find(); // unfiltered find
+
+    if (products.length === 0) {
+      return res.json({ message: "There are no products in database" });
+    }
+
+    // filtered find
+    if (req.headers.productfilter) {
+      const filter = req.headers.productfilter.toLowerCase();
+      if (filter === "popular") {
+        products.sort((a, b) => (a.viewedCount > b.viewedCount ? -1 : 1));
+      } else if (filter === "liked") {
+        products.sort((a, b) => (a.likedCount > b.likedCount ? -1 : 1));
+      } else if (filter === "bestseller") {
+        products.sort((a, b) => (a.purchasedCount > b.purchasedCount ? -1 : 1));
+      }
+    }
   } catch (error) {
     return next(new HttpError("Could not find any product", 500));
   }
 
-  if (products.length === 0) {
-    return res.json({ message: "There are no products in database" });
-  }
+  // console.log(products);
 
   res.status(200).json({
     products: products.map((product) => product.toObject({ getters: true })),
@@ -38,12 +52,22 @@ const getProductById = async (req, res, next) => {
     return next(new HttpError("Product not found", 404));
   }
 
+  try {
+    product.viewedCount += 1;
+    await product.save();
+  } catch (error) {
+    return next(
+      new HttpError("Could not add to viewCount of the product", 500)
+    );
+  }
+
   res.json({ product: product.toObject({ getters: true }) });
 };
 
 const createProduct = async (req, res, next) => {
   const username = decodeURIComponent(escape(req.headers.username));
-  const admin = User.findOne({ username: "admin" });
+  const admin = await User.findOne({ username: "admin" });
+
   if (username !== admin.username) {
     return next(new HttpError("You have no rights to this page", 401));
   }
@@ -63,6 +87,9 @@ const createProduct = async (req, res, next) => {
     description,
     price,
     image: req.file.path,
+    viewedCount: 0,
+    likedCount: 0,
+    purchasedCount: 0,
   });
 
   try {
