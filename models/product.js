@@ -8,6 +8,9 @@ const productSchema = new Schema({
   description: { type: String, required: false },
   price: { type: Number, required: true },
   image: { type: String, required: false, default: "" }, // url to image
+  // image2: { type: String, required: false, default: "" },
+  // image3: { type: String, required: false, default: "" },
+  // image4: { type: String, required: false, default: "" },
   viewedCount: { type: Number, required: true },
   likedCount: { type: Number, required: true },
   purchasedCount: { type: Number, required: true },

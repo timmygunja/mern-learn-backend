@@ -80,6 +80,12 @@ const createProduct = async (req, res, next) => {
   }
 
   const { name, firm, description, price } = req.body;
+  // let image;
+
+  // console.log(req);
+  // console.log(req.file.path);
+
+  // req.file.path ? (image = req.file.path) : (image = undefined);
 
   const createdProduct = new Product({
     name,
@@ -87,6 +93,7 @@ const createProduct = async (req, res, next) => {
     description,
     price,
     image: req.file.path,
+    // image,
     viewedCount: 0,
     likedCount: 0,
     purchasedCount: 0,
