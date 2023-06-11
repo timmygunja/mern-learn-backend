@@ -80,20 +80,34 @@ const createProduct = async (req, res, next) => {
   }
 
   const { name, firm, description, price } = req.body;
-  // let image;
 
-  // console.log(req);
-  // console.log(req.file.path);
+  // console.log("REQUEST FILES:", req.files);
 
-  // req.file.path ? (image = req.file.path) : (image = undefined);
+  let image;
+  let image2;
+  let image3;
+  let image4;
+
+  // for (let n = 0; n < 4; n++) {
+  //   req.files[n] !== undefined ? (images[n] = req.files[n].path) : {};
+  // }
+
+  req.files[0] !== undefined ? (image = req.files[0].path) : {};
+  req.files[1] !== undefined ? (image2 = req.files[1].path) : {};
+  req.files[2] !== undefined ? (image3 = req.files[2].path) : {};
+  req.files[3] !== undefined ? (image4 = req.files[3].path) : {};
 
   const createdProduct = new Product({
     name,
     firm,
     description,
     price,
-    image: req.file.path,
-    // image,
+
+    image,
+    image2,
+    image3,
+    image4,
+
     viewedCount: 0,
     likedCount: 0,
     purchasedCount: 0,

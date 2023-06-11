@@ -13,7 +13,13 @@ router.get("/", productsControllers.getProductsList);
 router.get("/:pid", productsControllers.getProductById);
 
 // router.post("/", check("name").not().isEmpty(), productsControllers.createProduct);
-router.post("/", fileUpload.single("image"), productsControllers.createProduct);
+// router.post("/", fileUpload.single("image"), productsControllers.createProduct);
+
+router.post(
+  "/",
+  fileUpload.array("image", 4),
+  productsControllers.createProduct
+);
 
 router.patch("/:pid", productsControllers.updateProduct);
 
