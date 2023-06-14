@@ -85,12 +85,12 @@ const deleteFromFavs = async (req, res, next) => {
     return next(new HttpError("Could not delete product from favorites", 500));
   }
 
-  try {
-    product.likedCount -= 1;
-    await product.save();
-  } catch (error) {
-    return next(new HttpError("Could not subtract from likedCount of the product", 500));
-  }
+  // try {
+  //   product.likedCount -= 1;
+  //   await product.save();
+  // } catch (error) {
+  //   return next(new HttpError("Could not subtract from likedCount of the product", 500));
+  // }
 
   res.status(200).json({
     message: "Deleted product from favorites successfully",
