@@ -22,6 +22,7 @@ router.post(
 );
 
 router.patch("/:pid", productsControllers.updateProduct);
+// router.post("/:pid", productsControllers.updateProduct);
 
 router.delete("/:pid", productsControllers.deleteProduct);
 

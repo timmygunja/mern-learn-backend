@@ -125,7 +125,8 @@ const createProduct = async (req, res, next) => {
 const updateProduct = async (req, res, next) => {
   let product;
   const productId = req.params.pid;
-  const { name, firm, description, price, image } = req.body;
+  const { name, firm, description, price, image, image2, image3, image4 } =
+    req.body;
 
   try {
     product = await Product.findById(productId);
@@ -137,7 +138,14 @@ const updateProduct = async (req, res, next) => {
   product.firm = firm;
   product.description = description;
   product.price = price;
-  product.image = image;
+  // product.image = image;
+  // product.image2 = image2;
+  // product.image3 = image3;
+  // product.image4 = image4;
+
+  console.log(name);
+
+  console.log(req.body);
 
   try {
     await product.save();
